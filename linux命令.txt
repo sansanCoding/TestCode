@@ -1,0 +1,104 @@
+1.替换所有行中的字符串
+	#将所有行中的123替换成abc
+	%s/123/abc/g
+
+	#批量替换文件内容
+	grep "127.0.0.1" ./*;grep "0.0.0.0" ./*;
+
+	#sed匹配正则:
+	#	sed -i "s/oldString/newString/g" `ls`;
+	#示例:
+	sed -i "s/127.0.0.1/0.0.0.0/g" `ls`;
+
+2.查看端口占用的情况
+	#lsof -i:端口号
+		#示例:lsof -i:3306
+
+	#netstat -tunlp |grep 端口号
+	#netstat -anp |grep 端口号
+		#示例:netstat -tunlp |grep 3306
+
+	#ps -ef |grep 进程名
+	#ps -aux |grep 进程id
+		#示例:ps -ef |grep php
+
+3.统计进程数
+	ps -ef |grep php|wc -l
+
+4.查找文件内容所在文件
+	#示例:
+	grep -r "{关键字}"  {路径}
+	#实例:
+	grep -r "php" ./*
+
+5.查看当前目录内文件夹的大小(可通过该命令,进入对应目录找到对应的大文件清除)
+	du -h --max-depth=1
+
+6.vim命令行模式下,格式化粘贴代码
+	set paste
+
+7.进入 /usr/lib/systemd/system 查看.service结尾的文件,systemctl 可操作的命令
+	#参考文章地址：https://blog.csdn.net/roet80736/article/details/79645239
+	/usr/lib/systemd/system
+
+8.这个命令 可以看到 所有进程打开的文件句柄数 从大到小排列的
+	lsof -n|awk '{print $2}'|sort|uniq -c|sort -nr|more
+
+	#效果如下:
+	98733 10252		#第一个数是文件数,第二个数是进程id,可使用 ps -aux|grep 进程id 查看
+	41246 952
+	17384 10370
+	15136 11857
+
+	#用这个看具体打开了哪些文件
+	lsof -p 进程ID
+
+9.查看systemctl执行命令中输出的信息
+	sudo journalctl -f
+
+	#查看systemctl中某个 /usr/lib/systemd/system/xxx.service 的日志,可使用journalctl _SYSTEMD_UNIT=xxx.service
+		如下就是监控查看:
+		sudo  journalctl _SYSTEMD_UNIT=xxxx.service -f
+
+	#停止和开启systemctl中某个service,该service名称是/usr/lib/systemd/system/xxx.service的xxx(即.service前面部分)
+		sudo systemctl stop xxxx;sudo systemctl start xxxx;
+
+	#配置systemd服务 xxxx.service (该xxxx.service内容只作参考!!!)
+		##使用vim编辑 /usr/lib/systemd/system/xxxx.service 文件(有可能不存在,需要新建),写入相关内容;
+		##写入相关内容时,注意使用到的命令以及相关路径是否是正确的,如有不一致,请根据部署时的路径保持一致.
+			
+			###注意:/home/www/php/pool_server的pool_server是可被执行的命令文件!###
+
+			vim /usr/lib/systemd/system/xxxx.service
+
+				[Unit]
+				Description=xxx api connect pool
+				After=network.target
+				After=syslog.target
+
+				[Service]
+				Type=forking
+				LimitNOFILE=65535
+				ExecStart=/usr/bin/php /home/www/php/pool_server start
+				ExecRestart=/usr/bin/php /home/www/php/pool_server restart
+				ExecStop=/usr/bin/php /home/www/php/pool_server stop
+				Restart=always
+
+				[Install]
+				WantedBy=multi-user.target
+
+		##修改完成后,刷新系统配置
+		sudo systemctl daemon-reload  
+
+		##启动
+		sudo systemctl start xxxx
+
+10.修改系统常量并生效
+	vim /etc/profile
+
+	source /etc/profile
+
+	echo $GOPATH
+
+11.查看linux系统当前时间
+	date +"%Y-%m-%d %H:%M:%S"

@@ -1,0 +1,39 @@
+1.查看node集群状态
+	pm2 status 
+
+2.查看node请求监控
+	pm2 log
+
+3.停掉监听的某个项目
+	pm2 stop 项目名(pm2 status.App name)
+
+	#示例-停掉www的项目
+	pm2 stop www
+
+4.删除监听的某个项目
+	pm2 delete 项目名(pm2 status.App name)
+
+#示例-删除www的项目
+	pm2 delete www
+
+5.开启某个项目监听,并动态更新代码
+	pm2 start bin/www --watch
+
+	#pm2 开启node集群,10个工作线程,另设置一个别名(根据CPU核数开启,4核就设置成3个,2个效率最高)
+	pm2 start bin/www -i 10 --name='node_dev'
+
+	#将pm2加入开机自启动
+	pm2 startup		#加入开机自启动
+	pm2 save		#保存当前进程状态
+
+6.重新加载代码
+	pm2 reload node_dev
+
+7.压测node
+	ab -c 10000 -n 100000 http://127.0.0.1:8899/
+
+8.安装node和pm2
+	yum install nodejs -y
+	npm install -g n
+	n stable
+	npm install -g pm2

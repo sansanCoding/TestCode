@@ -1,0 +1,2 @@
+1.kill -USR2 $PHP_FPM_Master_ID(php-fpm主进程id)
+kill -USR2 

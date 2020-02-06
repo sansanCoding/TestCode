@@ -1,0 +1,117 @@
+0.git clone后,使用git pull 需要输入账号和密码的解决方法:
+	#进入到项目目录中,即包含.git的目录,进去后可使用ll -as 查看到.git目录
+	#执行如下命令:
+	git config --global credential.helper store
+
+	#然后执行git pull,输入账号和密码之后,再使用git pull,不再需要输入账号和密码了
+
+1.查看指定的用户和某个时间之后的记录
+	#git log --author='用户,即Author' --since="时间(即在该时间之后)"
+
+	#2018年 9月 17日 00:00:00 之后
+	git log --author='SanSan <xxxx@gmail.com>' --since="Sep 17 00:00:00 2018"
+
+2.代码回归到指定的版本
+	git reset --hard 版本号(如git log显示的版本号)
+
+	git reset --hard 95967f1efcc2c4d12679af384501
+
+	#回滚到上一个版本
+	git reset --hard HEAD~1
+
+3-1.合并冲突与解决
+	a.找到冲突的地方,确认保留的代码,清掉<<<<<<< , ======= , 和 >>>>>>>这些行标记;
+	b.然后使用git add xxx文件,再用 git commit -m '合并master并解决冲突和提交';
+	c.再git push 即可;
+
+3-2.手动解决冲突后提交冲突文件
+	#查看冲突文件
+	git status
+
+	#手动解决冲突文件后
+
+	#使用git add 添加冲突文件即可
+	git add xxxx.xx
+
+	#提交文件到暂存区
+	git commit -am 'xxxx修改冲突'
+
+	#提交到master远程仓库
+	git pull origin master
+
+======================= 回退指定版本号并推送到主干(该操作比较危险,且没有经过实际操作,只作参考!) =======================
+
+直接找到要回退的版本号（这里是：83ff2785），reset之后，强行推送到服务器端：
+
+git reset --hard 83ff2785
+git push --force	#该命令由可能需要master权限,一般我们作为developer,是没有master权限的
+
+此时如果有人获取了更新的版本，可能拉去不下来，执行以下操作：
+
+git fetch --all
+git reset --hard origin/branchname
+
+
+branchname就是分支的名称，这时候就和服务器端一致了。
+
+=========================================================================================================================
+
+4.创建分支并推送到远程
+	git branch sansan_dev
+	git push origin sansan_dev
+
+5.删除远程分支(删除多个分支时,分支名使用空格隔开)
+	#git push origin --delete xx分支 xx分支
+	git push origin --delete sansan_dev sansan_dev_1
+
+6.删除本地分支(删除多个分支时,分支名使用空格隔开)
+	#git branch -d  xx分支 xx分支
+	git branch -d sansan_dev sansan_dev_1
+
+7.强制更新远程分支
+	git remote update origin --prune
+
+8.强制更新并拉取-master主干-最新版本代码
+	git fetch --all;git reset --hard origin/master;git pull origin master;
+
+9.显示2个分支-所有有差异的文件列表
+	git diff branch1 branch2 --stat 
+
+10.查看某个文件的commit记录
+	git log 文件名称
+
+11.查看某个文件的commit记录与diff
+	git log -p 文件名称
+
+12.只看某次提交中的某个文件变化
+	git show 9725b5dece57f8cbece4a96b9f80b 文件名称
+
+============================================== 分支合并主干,只有一次分支提交记录 start ==============================================
+13.将分支多次提交汇总合并到主干,即合并到主干后,只有一次分支提交记录
+###命令参考如下:###
+	git checkout master 
+
+	git merge --squash  branchname
+
+	git commit -m "branch功能完成，合并到主干"
+
+###分支多次提交汇总合并到主干后只有一次分支提交记录示例:###
+a.必须保持分支代码都包含最新的主干代码
+	比如开发的分支很久,先将 主干代码 合并到 开发的分支 上;再将 该分支(即合并过最新主干代码的分支+该分支开发的代码) 合并到主干上.
+
+b.切换到主干
+	$ git checkout master
+
+c.将分支代码合并到主干上(此步没有commit和push)
+	$ git merge --squash sansan_dev -m '合并分支代码:添加xxx功能'
+
+d.可使用git status查看当时状态(此步可以省略,但是可以通过git status查看到是否是需要commit还是push)
+	$ git status
+
+e.使用git commit -m 提交部分 或-am 提交全部的合并代码
+	$ git commit -am '提交合并分支代码:开发xxxx功能'
+
+f.最后使用git push推送到主干上
+	$ git push origin master
+
+============================================== 分支合并主干,只有一次分支提交记录 end ==============================================
